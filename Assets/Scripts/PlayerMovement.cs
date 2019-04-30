@@ -14,6 +14,9 @@ public class PlayerMovement : MonoBehaviour
     public LayerMask collisionLayer;
 
     public int boulderLayer = 11;
+
+    public AudioSource walkAudio;
+    public AudioSource boulderAudio;
     
     void Awake() {
         this.player = Rewired.ReInput.players.GetPlayer("Player0");
@@ -32,11 +35,13 @@ public class PlayerMovement : MonoBehaviour
             posBoulder.x += movement.x;
             posBoulder.y += movement.y;
             hit.collider.gameObject.transform.position = posBoulder;
+            this.boulderAudio.Play();    
         } else {
             Vector3 pos = this.transform.position;
             pos.x += movement.x;
             pos.y += movement.y;
-            this.transform.position = pos;    
+            this.transform.position = pos;
+            this.walkAudio.Play();    
         }
 
     }

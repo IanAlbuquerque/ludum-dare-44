@@ -92,42 +92,131 @@ public class GameController : DesignPatterns.MonoBehaviorSingleton<GameControlle
     // Start is called before the first frame update
     void Start()
     {
+        this.swapToUIBGM();
+        this.bgmIntroPiano.Play();
+        this.bgmIntroSax.Play();
+        this.bgmLoopBass.Play();
+
+        coroutine = playLoop(this.bgmIntroPiano.clip.length - 1.7f);
+        StartCoroutine(coroutine);
+        // this.bgmLoopBass.PlayDelayed(this.bgmLoopBass.clip.length - 1.0f);
     }
+
+    private IEnumerator coroutine;
+
+    private IEnumerator playLoop(float waitTime)
+    {
+        yield return new WaitForSeconds(waitTime);
+        this.bgmLoopPiano.Play();
+        this.bgmLoopSax.Play();
+    }    
+
+    public GameObject muteAudioButton;
+    public GameObject unMuteAudioButton;
+
+    public void muteAudio() {
+        this.bgmIntroPiano.mute = true;
+        this.bgmIntroSax.mute = true;
+        this.bgmIntroBass.mute = true;
+        this.bgmLoopPiano.mute = true;
+        this.bgmLoopSax.mute = true;
+        this.bgmLoopBass.mute = true;
+        this.muteAudioButton.SetActive(false);
+        this.unMuteAudioButton.SetActive(true);
+    }
+
+    public void unmuteAudio() {
+        this.bgmIntroPiano.mute = false;
+        this.bgmIntroSax.mute = false;
+        this.bgmIntroBass.mute = false;
+        this.bgmLoopPiano.mute = false;
+        this.bgmLoopSax.mute = false;
+        this.bgmLoopBass.mute = false;
+        this.muteAudioButton.SetActive(true);
+        this.unMuteAudioButton.SetActive(false);
+    }
+
+    public void swapToUIBGM() {
+        this.bgmIntroPiano.volume = 0.0f;
+        this.bgmIntroSax.volume = 1.0f;
+        this.bgmIntroBass.volume = 0.0f;
+        this.bgmLoopPiano.volume = 0.0f;
+        this.bgmLoopSax.volume = 1.0f;
+        this.bgmLoopBass.volume = 0.0f;
+    }
+
+    public void swapToCreateBGM() {
+        this.bgmIntroPiano.volume = 1.0f;
+        this.bgmIntroSax.volume = 0.0f;
+        this.bgmIntroBass.volume = 0.0f;
+        this.bgmLoopPiano.volume = 1.0f;
+        this.bgmLoopSax.volume = 0.0f;
+        this.bgmLoopBass.volume = 0.0f;
+    }
+
+    public void swapToPlayBGM() {
+        this.bgmIntroPiano.volume = 0.0f;
+        this.bgmIntroSax.volume = 0.0f;
+        this.bgmIntroBass.volume = 1.0f;
+        this.bgmLoopPiano.volume = 0.0f;
+        this.bgmLoopSax.volume = 0.0f;
+        this.bgmLoopBass.volume = 1.0f;
+    }
+
+    public AudioSource bgmIntroSax;
+    public AudioSource bgmIntroPiano;
+    public AudioSource bgmIntroBass;
+    public AudioSource bgmLoopSax;
+    public AudioSource bgmLoopPiano;
+    public AudioSource bgmLoopBass;
+    public AudioSource sfxDeath;
+    public AudioSource sfxClick;
+    public AudioSource sfxPlacement;
+    public AudioSource sfxBrushSelect;
 
     public void onClickCreateLevels() {
         this.menuUI.SetActive(false);
         this.livesCreationUI.SetActive(true);
+        this.livesToUse = 3;
+        this.creditsAvailable = this.livesToCredits(this.livesToUse);
+        this.sfxClick.Play();
     }
 
     public void onClickPlayLevels() {
         this.menuUI.SetActive(false);
         this.levelSelectionUI.SetActive(true);
+        this.sfxClick.Play();
     }
 
     public void onClickQuitGame() {
+        this.sfxClick.Play();
         Application.Quit();
     }
 
     public void onClickBackFromLivesCreationUI() {
+        this.sfxClick.Play();
         this.livesCreationUI.SetActive(false);
         this.menuUI.SetActive(true);
     }
 
     public void onClickIncreaseLivesToUse() {
         if(this.livesToUse < 5) {
+            this.sfxClick.Play();
             this.livesToUse += 1;
-            this.creditsAvailable += 75;
+            this.creditsAvailable = this.livesToCredits(this.livesToUse);
         }
     }
 
     public void onClickDecreaseLivesToUse() {
         if(this.livesToUse > 1) {
+            this.sfxClick.Play();
             this.livesToUse -= 1;
-            this.creditsAvailable -= 75;
+            this.creditsAvailable = this.livesToCredits(this.livesToUse);
         }
     }
 
     public void onClickContinueToLevelCreation() {
+        this.sfxClick.Play();
         int actualLivesToUse = this.livesToUse;
         this.levelLoaded = this.editLevelTemplate;
         this.loadLevelString();
@@ -140,66 +229,83 @@ public class GameController : DesignPatterns.MonoBehaviorSingleton<GameControlle
         this.currentCredits = this.creditsAvailable;
         this.livesToUse = actualLivesToUse;
         this.lives = this.livesToUse;
+        this.creditsAvailable = this.livesToCredits(this.livesToUse);
+        this.swapToCreateBGM();
     }
 
+    private int livesToCredits(int lives) {
+        return 50 * lives + 100;
+    }
 
     public void onClickWallBrush() {
+        this.sfxBrushSelect.Play();
         this.currentBrush = 1;
         this.brushIndicator.GetComponent<SpriteRenderer>().sprite = this.wallSprite;
     }
 
     public void onClickBoulderBrush() {
+        this.sfxBrushSelect.Play();
         this.currentBrush = 2;
         this.brushIndicator.GetComponent<SpriteRenderer>().sprite = this.boulderSprite;
     }
 
     public void onClickLaserBrush() {
+        this.sfxBrushSelect.Play();
         this.currentBrush = 3;
         this.brushIndicator.GetComponent<SpriteRenderer>().sprite = this.laserSprite;
     }
 
     public void onClickLaserBrushDown() {
+        this.sfxBrushSelect.Play();
         this.currentBrush = 6;
         this.brushIndicator.GetComponent<SpriteRenderer>().sprite = this.laserSpriteDown;
     }
 
     public void onClickLaserBrushLeft() {
+        this.sfxBrushSelect.Play();
         this.currentBrush = 7;
         this.brushIndicator.GetComponent<SpriteRenderer>().sprite = this.laserSpriteLeft;
     }
 
     public void onClickLaserBrushUp() {
+        this.sfxBrushSelect.Play();
         this.currentBrush = 8;
         this.brushIndicator.GetComponent<SpriteRenderer>().sprite = this.laserSpriteUp;
     }
 
     public void restartPlayableLevel() {
+        this.sfxClick.Play();
         this.loadLevelString();
         this.cleanTempGrid();
     }
 
     public void onClickFlagBrush() {
+        this.sfxBrushSelect.Play();
         this.currentBrush = 4;
         this.brushIndicator.GetComponent<SpriteRenderer>().sprite = this.flagSprite;
         
     }
 
     public void onClickHeroBrush() {
+        this.sfxBrushSelect.Play();
         this.currentBrush = 5;
         this.brushIndicator.GetComponent<SpriteRenderer>().sprite = this.heroSprite;
         
     }
 
     public void onClickEraseBrush() {
+        this.sfxBrushSelect.Play();
         this.currentBrush = 0;
         this.brushIndicator.GetComponent<SpriteRenderer>().sprite = this.eraseSprite;
     }
 
     public void onClickBackFromCreationUI() {
+        this.sfxClick.Play();
         this.creationUI.SetActive(false);
         this.isInCreationBrushMode = false;
         this.brushObject.SetActive(false);
         this.livesCreationUI.SetActive(true);
+        this.swapToUIBGM();
     }
 
     private int tileCost(int i) {
@@ -211,47 +317,55 @@ public class GameController : DesignPatterns.MonoBehaviorSingleton<GameControlle
             case 2:
                 return 10;
             case 3:
-                return 15;
+                return 20;
             case 4:
                 return 0;
             case 5:
                 return 0;
             case 6:
-                return 15;
+                return 20;
             case 7:
-                return 15;
+                return 20;
             case 8:
-                return 15;
+                return 20;
             default:
                 return 0;
         }
     }
 
     public void onClickPlayGame() {
+        this.sfxClick.Play();
         this.levelSelectionUI.SetActive(true);
         this.menuUI.SetActive(false);
     }
 
     public void onClickBackFromLevelSelectScreen() {
+        this.sfxClick.Play();
         this.levelSelectionUI.SetActive(false);
         this.menuUI.SetActive(true);
     }
 
     public void onClickBackFromPlayLevel() {
+        this.sfxClick.Play();
         this.levelSelectionUI.SetActive(true);
         this.playGameUI.SetActive(false);
         this.levelIsRunning = false;
         this.isPlayingActualLevel = false;
+        this.swapToUIBGM();
     }
 
     public void onClickWin() {
+        this.sfxClick.Play();
         this.winUI.SetActive(false);
         this.levelSelectionUI.SetActive(true);
+        this.swapToUIBGM();
     }
 
     public void onClickLose() {
+        this.sfxClick.Play();
         this.loseUI.SetActive(false);
         this.levelSelectionUI.SetActive(true);
+        this.swapToUIBGM();
     }
 
     private void loadSetupLevel() {
@@ -263,22 +377,27 @@ public class GameController : DesignPatterns.MonoBehaviorSingleton<GameControlle
         this.lives = this.livesToUse;
         this.levelIsRunning = true;
         this.isPlayingActualLevel = true;
+        this.swapToPlayBGM();
     }
 
     public void onClickLoadLevel() {
+        this.sfxClick.Play();
         this.levelLoaded = this.levelSelectInputLevel.text;
         this.loadSetupLevel();
     }
 
     public void onClickLoadLevel1() {
+        this.sfxClick.Play();
         this.levelSelectInputLevel.text = this.level1;
     }
 
     public void onClickLoadLevel2() {
+        this.sfxClick.Play();
         this.levelSelectInputLevel.text = this.level2;
     }
 
     public void onClickLoadLevel3() {
+        this.sfxClick.Play();
         this.levelSelectInputLevel.text = this.level3;
     }
 
@@ -290,6 +409,7 @@ public class GameController : DesignPatterns.MonoBehaviorSingleton<GameControlle
             return;
         }
         
+        this.sfxPlacement.Play();
         for(int i=0; i<this.grid.transform.childCount; i++) {
             Transform childTranform = this.grid.transform.GetChild(i).transform;
             if( Mathf.Abs(childTranform.position.x - this.brushObject.transform.position.x) < 0.5f &&
@@ -389,6 +509,7 @@ public class GameController : DesignPatterns.MonoBehaviorSingleton<GameControlle
     }
 
     public void backFromTryLevel() {
+        this.sfxClick.Play();
         this.levelIsRunning = false;
         this.brushObject.SetActive(true);
         this.isInCreationBrushMode = true;
@@ -397,9 +518,11 @@ public class GameController : DesignPatterns.MonoBehaviorSingleton<GameControlle
         this.playGameCreateUI.SetActive(false);
         this.creationUI.SetActive(true); 
         this.cleanTempGrid();
+        this.swapToCreateBGM();
     }
 
     public void tryLevel() {
+        this.sfxClick.Play();
         this.lives = this.livesToUse;
         this.levelIsRunning = true;
         this.brushObject.SetActive(false);
@@ -411,6 +534,7 @@ public class GameController : DesignPatterns.MonoBehaviorSingleton<GameControlle
         this.creationUI.SetActive(false);
         this.heroObject = GameObject.FindGameObjectWithTag("Hero");
         this.heroStartingPosition = this.heroObject.transform.position; 
+        this.swapToPlayBGM();
     }
 
     public void onFlagReach() {
@@ -428,6 +552,7 @@ public class GameController : DesignPatterns.MonoBehaviorSingleton<GameControlle
     }
 
     public void onClickPublish() {
+        this.sfxClick.Play();
         this.isInCreationBrushMode = false;
         this.brushObject.SetActive(false);
         this.creationUI.SetActive(false);
@@ -436,16 +561,26 @@ public class GameController : DesignPatterns.MonoBehaviorSingleton<GameControlle
     }
 
     public void onClickPublishBackToMainMenu() {
+        this.sfxClick.Play();
         this.publishUI.SetActive(false);
         this.menuUI.SetActive(true);
+        this.swapToUIBGM();
+    }
+
+    public bool killedHero = false;
+
+    private void LateUpdate() {
+        killedHero = false;
     }
 
     public void KillHero() {
+        if(this.killedHero == true) {
+            return;
+        }
+        this.killedHero = true;
+        this.sfxDeath.Play();
         if(this.lives > 1) {
             this.lives -= 1;
-            Debug.Log("a" + this.heroObject);
-            Debug.Log("b" + this.boulderHeroPrefab);
-            Debug.Log("c" + this.tempGrid);
             GameObject.Instantiate(this.boulderHeroPrefab, this.heroObject.transform.position, Quaternion.identity, this.tempGrid.transform);
             this.heroObject.transform.position = this.heroStartingPosition;
         } else {
